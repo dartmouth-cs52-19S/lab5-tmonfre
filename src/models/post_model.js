@@ -6,6 +6,10 @@ const PostSchema = new Schema({
   tags: String,
   content: String,
   cover_url: String,
+}, {
+  toJSON: {
+    virtuals: true,
+  },
 });
 
 // create PostModel class from schema
