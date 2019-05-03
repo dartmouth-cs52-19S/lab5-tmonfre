@@ -10,7 +10,7 @@ export const createPost = (req, res) => {
 
   post.save()
     .then((result) => {
-      res.json({ message: 'Post created!', result });
+      res.json({ message: 'post created', result });
     })
     .catch((error) => {
       res.status(500).json({ error });
@@ -18,25 +18,41 @@ export const createPost = (req, res) => {
 };
 
 export const getPosts = (req, res) => {
-  Post.find({}).then((result) => {
-    res.send(result);
-  });
+  Post.find({})
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((error) => {
+      res.status(500).json({ error });
+    });
 };
 
 export const getPost = (req, res) => {
-  Post.findOne({ _id: req.params.id }).then((result) => {
-    res.send(result);
-  });
+  Post.findOne({ _id: req.params.id })
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((error) => {
+      res.status(500).json({ error });
+    });
 };
 
 export const deletePost = (req, res) => {
-  Post.deleteOne({ _id: req.params.id }).then((result) => {
-    res.json({ message: 'deleted post', result });
-  });
+  Post.deleteOne({ _id: req.params.id })
+    .then((result) => {
+      res.json({ message: 'deleted post', result });
+    })
+    .catch((error) => {
+      res.status(500).json({ error });
+    });
 };
 
 export const updatePost = (req, res) => {
-  Post.updateOne({ _id: req.params.id }, req.body).then((result) => {
-    res.json({ message: 'updated post', result });
-  });
+  Post.updateOne({ _id: req.params.id }, req.body)
+    .then((result) => {
+      res.json({ message: 'updated post', result });
+    })
+    .catch((error) => {
+      res.status(500).json({ error });
+    });
 };
