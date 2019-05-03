@@ -4,7 +4,7 @@ export const createPost = (req, res) => {
   const post = new Post();
 
   post.title = req.body.title;
-  post.tags = req.body.tags;
+  post.tags = req.body.tags.split(/[ ,]+/);
   post.content = req.body.content;
   post.cover_url = req.body.cover_url;
 
@@ -48,6 +48,10 @@ export const deletePost = (req, res) => {
 };
 
 export const updatePost = (req, res) => {
+  if (req.body.tags) {
+    req.body.tags = req.body.tags.split(/[ ,]+/);
+  }
+
   Post.updateOne({ _id: req.params.id }, req.body)
     .then((result) => {
       res.json({ message: 'updated post', result });

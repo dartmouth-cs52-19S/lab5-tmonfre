@@ -3,7 +3,7 @@ import mongoose, { Schema } from 'mongoose';
 // create a PostSchema with a title field
 const PostSchema = new Schema({
   title: String,
-  tags: String,
+  tags: Array,
   content: String,
   cover_url: String,
 }, {
