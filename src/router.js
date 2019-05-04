@@ -26,4 +26,12 @@ router.route('/posts/:id')
     Posts.deletePost(req, res);
   });
 
+router.post('/addcomment/:id', (req, res) => {
+  Posts.addComment(req, res);
+});
+
+router.post('/deletecomment/:id', (req, res) => {
+  Posts.deleteComment(req, res);
+});
+
 export default router;

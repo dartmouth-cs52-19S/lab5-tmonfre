@@ -6,6 +6,7 @@ const PostSchema = new Schema({
   tags: Array,
   content: String,
   cover_url: String,
+  comments: Array,
 }, {
   toJSON: {
     virtuals: true,
