@@ -66,7 +66,7 @@ export const updatePost = (req, res) => {
         Post.updateOne({ _id: req.params.id }, req.body)
           .then(() => {
           // grab updated object to send back to client
-            Post.findOne({ _id: req.params.id })
+            Post.findOne({ _id: req.params.id }).populate('author')
               .then((updatedObject) => {
                 res.json({ message: 'updated post', result: updatedObject });
               })
