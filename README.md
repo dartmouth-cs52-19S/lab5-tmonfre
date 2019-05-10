@@ -17,3 +17,22 @@ Post tags are stored in an array in the database, rather than just a string.
 A user can leave comments on any post. Comments are stored in an Array for each Post object. Comments have a string representing the text and a timestamp representing when the post was created. Users can also delete comments.
 
 ![screenshot](comments.png)
+
+---
+
+# Lab 5 Updates :floppy_disk:
+
+## What I Did
+I added user authentication to the web app. Users can create an account, log in, and log out. There's also a permissions hierarchy. You must be signed in to create, update, or delete a post or comment.
+
+## What Worked / Didn't Work
+I started out by creating the user auth model and controller. Once I had the base version of this working with cURL, I then tested it on my frontend and made changes/updates as I went.
+
+I then updated the way I was storing comments by creating a Comments model. Each post has an array of comment objects. This cleaned up the structure of the database, and allowed for more information and user references to be stored.
+
+I had some trouble with deleting comments at first. For some reason, the `findByIDAndDelete` method from mongoose wasn't working for me. Instead, I had to `findOne` then delete it.
+
+## Extra Credit
+
+### Comments
+Only authenticated users can see comments and make comments. You must be authenticated to delete your own comment. Username of author of comment is stored to display on frontend. Since username is a unique field, this also allows for ensuring one can delete a given comment, since they must be authenticated to hit the controller.
