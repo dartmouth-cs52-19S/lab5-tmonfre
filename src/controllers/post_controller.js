@@ -7,6 +7,7 @@ export const createPost = (req, res) => {
   post.tags = req.body.tags;
   post.content = req.body.content;
   post.cover_url = req.body.cover_url;
+  post.author = req.user;
   post.comments = [];
 
   post.save()
@@ -61,29 +62,47 @@ export const getPost = (req, res) => {
 };
 
 export const deletePost = (req, res) => {
-  Post.deleteOne({ _id: req.params.id })
+  Post.findOne({ _id: req.params.id }).populate('author')
     .then((result) => {
-      res.json({ message: 'deleted post', data: result });
-    })
-    .catch((error) => {
-      res.status(500).json({ error });
+      console.log(result);
+
+      if (result.author.email !== req.user.email) {
+        res.status(500).send(`User with email: ${req.user.email} is not authorized to delete this post.`);
+      } else {
+        Post.deleteOne({ _id: req.params.id })
+          .then((obj) => {
+            res.json({ message: 'deleted post', data: obj });
+          })
+          .catch((error) => {
+            res.status(500).json({ error });
+          });
+      }
     });
 };
 
 export const updatePost = (req, res) => {
-  Post.updateOne({ _id: req.params.id }, req.body)
+  Post.findOne({ _id: req.params.id }).populate('author')
     .then((result) => {
-      // grab updated object to send back to client
-      Post.findOne({ _id: req.params.id })
-        .then((updatedObject) => {
-          res.json({ message: 'updated post', result: updatedObject });
-        })
-        .catch((error) => {
-          res.status(500).json({ error });
-        });
-    })
-    .catch((error) => {
-      res.status(500).json({ error });
+      console.log(result);
+
+      if (result.author.email !== req.user.email) {
+        res.status(500).send(`User with email: ${req.user.email} is not authorized to edit this post.`);
+      } else {
+        Post.updateOne({ _id: req.params.id }, req.body)
+          .then(() => {
+          // grab updated object to send back to client
+            Post.findOne({ _id: req.params.id })
+              .then((updatedObject) => {
+                res.json({ message: 'updated post', result: updatedObject });
+              })
+              .catch((error) => {
+                res.status(500).json({ error });
+              });
+          })
+          .catch((error) => {
+            res.status(500).json({ error });
+          });
+      }
     });
 };
 
@@ -93,6 +112,7 @@ export const addComment = (req, res) => {
       result.comments.push({
         comment: req.body.comment,
         timestring: Date.now(),
+        author: req.user,
       });
 
       result.save()
