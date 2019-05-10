@@ -8,6 +8,7 @@ export const createPost = (req, res) => {
   post.content = req.body.content;
   post.cover_url = req.body.cover_url;
   post.author = req.user;
+  post.timestamp = Date.now();
   post.comments = [];
 
   post.save()
@@ -20,7 +21,7 @@ export const createPost = (req, res) => {
 };
 
 export const getPosts = (req, res) => {
-  Post.find({})
+  Post.find({}).populate('author', 'username') // grab the author's username
     .then((result) => {
       res.send(result);
     })
@@ -30,31 +31,9 @@ export const getPosts = (req, res) => {
 };
 
 export const getPost = (req, res) => {
-  Post.findOne({ _id: req.params.id })
+  Post.findOne({ _id: req.params.id }).populate('author', 'username') // grab the author's username
     .then((result) => {
-      // tags field went from string to array, so intentionally update all old string versions to arrays
-      if (typeof result.tags === 'string') {
-        result.tags = result.tags.split(/[ ,]+/);
-        result.save()
-          .then((updated) => {
-            res.send(updated);
-          })
-          .catch((error) => {
-            res.status(500).json({ error });
-          });
-        // comments field is new, add it for posts without
-      } else if (result.comments === undefined) {
-        result.comments = [];
-        result.save()
-          .then((updated) => {
-            res.send(updated);
-          })
-          .catch((error) => {
-            res.status(500).json({ error });
-          });
-      } else {
-        res.send(result);
-      }
+      res.send(result);
     })
     .catch((error) => {
       res.status(500).json({ error });
@@ -64,8 +43,6 @@ export const getPost = (req, res) => {
 export const deletePost = (req, res) => {
   Post.findOne({ _id: req.params.id }).populate('author')
     .then((result) => {
-      console.log(result);
-
       if (result.author.email !== req.user.email) {
         res.status(500).send(`User with email: ${req.user.email} is not authorized to delete this post.`);
       } else {
@@ -83,8 +60,6 @@ export const deletePost = (req, res) => {
 export const updatePost = (req, res) => {
   Post.findOne({ _id: req.params.id }).populate('author')
     .then((result) => {
-      console.log(result);
-
       if (result.author.email !== req.user.email) {
         res.status(500).send(`User with email: ${req.user.email} is not authorized to edit this post.`);
       } else {
@@ -103,65 +78,5 @@ export const updatePost = (req, res) => {
             res.status(500).json({ error });
           });
       }
-    });
-};
-
-export const addComment = (req, res) => {
-  Post.findOne({ _id: req.params.id })
-    .then((result) => {
-      result.comments.push({
-        comment: req.body.comment,
-        timestring: Date.now(),
-        author: req.user,
-      });
-
-      result.save()
-        .then((obj) => {
-          Post.findOne({ _id: req.params.id })
-            .then((updatedObject) => {
-              res.json({ message: 'added comment', result: updatedObject });
-            })
-            .catch((error) => {
-              res.status(500).json({ error });
-            });
-        })
-        .catch((error) => {
-          res.status(500).json({ error });
-        });
-    })
-    .catch((error) => {
-      res.status(500).json({ error });
-    });
-};
-
-export const deleteComment = (req, res) => {
-  Post.findOne({ _id: req.params.id })
-    .then((result) => {
-      const output = [];
-
-      result.comments.forEach((comment) => {
-        if (comment.timestring !== req.body.comment.timestring) {
-          output.push(comment);
-        }
-      });
-
-      result.comments = output;
-
-      result.save()
-        .then((obj) => {
-          Post.findOne({ _id: req.params.id })
-            .then((updatedObject) => {
-              res.json({ message: 'deleted comment', result: updatedObject });
-            })
-            .catch((error) => {
-              res.status(500).json({ error });
-            });
-        })
-        .catch((error) => {
-          res.status(500).json({ error });
-        });
-    })
-    .catch((error) => {
-      res.status(500).json({ error });
     });
 };

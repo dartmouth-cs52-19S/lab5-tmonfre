@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as Posts from './controllers/post_controller';
-import * as UserController from './controllers/user_controller';
+import * as Comments from './controllers/comment_controller';
+import * as Users from './controllers/user_controller';
 import { requireAuth, requireSignin } from './services/passport';
 
 const router = Router();
@@ -22,17 +23,14 @@ router.route('/posts/:id')
   .put(requireAuth, Posts.updatePost)
   .delete(requireAuth, Posts.deletePost);
 
-// TODO: protect these with requireAuth
-router.post('/addcomment/:id', (req, res) => {
-  Posts.addComment(req, res);
-});
+router.route('/addcomment/:id')
+  .post(requireAuth, Comments.createComment);
 
-router.post('/deletecomment/:id', (req, res) => {
-  Posts.deleteComment(req, res);
-});
+router.route('/deletecomment/:id')
+  .post(requireAuth, Comments.deleteComment);
 
-router.post('/signin', requireSignin, UserController.signin);
+router.post('/signin', requireSignin, Users.signin);
 
-router.post('/signup', UserController.signup);
+router.post('/signup', Users.signup);
 
 export default router;

@@ -5,15 +5,29 @@ import User from '../models/user_model';
 dotenv.config({ silent: true });
 
 export const signin = (req, res, next) => {
-  res.send({ token: tokenForUser(req.user) });
+  User.findOne({ email: req.body.email })
+    .then((result) => {
+      res.send({
+        token: tokenForUser(req.user),
+        userData: {
+          id: result.id,
+          email: result.email,
+          username: result.username,
+        },
+      });
+    })
+    .catch((error) => {
+      res.status(500).json({ error });
+    });
 };
 
 export const signup = (req, res, next) => {
   const { email } = req.body;
   const { password } = req.body;
+  const { username } = req.body;
 
-  if (!email || !password) {
-    res.status(422).send('You must provide email and password.');
+  if (!email || !password || !username) {
+    res.status(422).send('You must provide username, email, and password.');
   }
 
   // here you should do a mongo query to find if a user already exists with this email.
@@ -21,20 +35,28 @@ export const signup = (req, res, next) => {
   // Save the new User object
   // this is similar to how you created a Post
   // and then return a token same as you did in in signin
-  User.countDocuments({ email }, (err, count) => {
+  User.countDocuments({ email, username }, (err, count) => {
     if (err) {
       res.status(500).send(err);
     } else if (count > 0) {
-      res.status(422).send(`A user already exists with email: ${email}.`);
+      res.status(422).send(`A user already exists with email: ${email} and/or username: ${username}.`);
     } else {
       const user = new User();
 
       user.email = email;
       user.password = password;
+      user.username = username;
 
       user.save()
         .then((result) => {
-          res.send({ token: tokenForUser(result) });
+          res.send({
+            token: tokenForUser(result),
+            userData: {
+              id: result.id,
+              email: result.email,
+              username: result.username,
+            },
+          });
         })
         .catch((error) => {
           res.status(500).json({ error });
